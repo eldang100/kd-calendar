@@ -18,13 +18,29 @@
     // Service Worker
     if('serviceWorker' in navigator) {
         const swCode = `
+const CACHE = 'daewon-v4';
 self.addEventListener('install', e => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(clients.claim()));
-self.addEventListener('fetch', e => e.respondWith(
-    caches.open('daewon-v3').then(cache =>
-        cache.match(e.request).then(res => res || fetch(e.request).then(r => { cache.put(e.request, r.clone()); return r; }).catch(() => res))
-    )
-));`;
+self.addEventListener('activate', e => e.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => clients.claim())
+));
+self.addEventListener('fetch', e => {
+    const req = e.request;
+    const isDoc = req.mode === 'navigate' || (req.destination === 'document') || /\\.html(\\?|$)/.test(req.url);
+    if(isDoc) {
+        // HTML은 항상 최신: 네트워크 우선, 실패 시 캐시
+        e.respondWith(
+            fetch(req).then(r => { const c = r.clone(); caches.open(CACHE).then(cache => cache.put(req, c)); return r; })
+            .catch(() => caches.open(CACHE).then(cache => cache.match(req)))
+        );
+    } else {
+        // 그 외(폰트 등)는 캐시 우선
+        e.respondWith(
+            caches.open(CACHE).then(cache =>
+                cache.match(req).then(res => res || fetch(req).then(r => { cache.put(req, r.clone()); return r; }).catch(() => res))
+            )
+        );
+    }
+});`;
         const swBlob = new Blob([swCode], {type:'application/javascript'});
         const swUrl = URL.createObjectURL(swBlob);
         navigator.serviceWorker.register(swUrl).catch(()=>{});
