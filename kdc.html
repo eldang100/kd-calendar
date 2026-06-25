@@ -44,6 +44,19 @@ self.addEventListener('fetch', e => {
         const swBlob = new Blob([swCode], {type:'application/javascript'});
         const swUrl = URL.createObjectURL(swBlob);
         navigator.serviceWorker.register(swUrl).catch(()=>{});
+
+        // 옛 캐시 강제 정리: 저장된 버전과 다르면 캐시 전부 비우고 1회 새로고침
+        const APP_VER = 'daewon-2026-06-25b';
+        if(localStorage.getItem('__app_ver') !== APP_VER) {
+            if('caches' in window) {
+                caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
+                    localStorage.setItem('__app_ver', APP_VER);
+                    location.reload();
+                });
+            } else {
+                localStorage.setItem('__app_ver', APP_VER);
+            }
+        }
     }
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
