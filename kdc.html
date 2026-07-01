@@ -1307,7 +1307,7 @@ function getDepartTime(turn, date) {
     const table = BUS_SCHEDULE[tableKey];
     return table && table[turn] ? table[turn] : ['',''];
 }
-let currentDate = new Date(2026, 5, 1);
+let currentDate = (function(){ const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), 1); })();
 let selectedDate = new Date();
 let selectedDateStr = "";
 let dayModalDate = null;
