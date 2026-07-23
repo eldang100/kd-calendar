@@ -2084,7 +2084,18 @@ function initSettingsForm() {
 
 function toggleSettingsModal(show) {
     document.getElementById('settings-modal').style.display = show ? 'flex' : 'none';
-    if(show) { initAllRgbDisplays(); initSettingsDragClose(); initRouteButtons(); initRouteSettingUI(); }
+    if(show) {
+        initAllRgbDisplays(); initSettingsDragClose(); initRouteButtons(); initRouteSettingUI();
+        // 순번 기준점: 한 번도 직접 저장한 적 없으면(초기 기본값 그대로면) 화면에 보이는 달의 1일을 보여줌.
+        // 이미 저장한 적 있으면 그 값을 그대로 보여줌 (임의로 안 바뀜)
+        if(userSettings.baseDateStr === '2026-06-01' && !userSettings._baseDateSaved) {
+            const y = currentDate.getFullYear(), m = currentDate.getMonth();
+            const mm = String(m+1).padStart(2,'0');
+            document.getElementById('base-date-input').value = `${y}-${mm}-01`;
+        } else {
+            document.getElementById('base-date-input').value = userSettings.baseDateStr;
+        }
+    }
 }
 
 function initSettingsDragClose() {
@@ -2228,6 +2239,7 @@ function saveSettings() {
     const isOpen = modal && modal.style.display === 'flex';
     if(isOpen) {
         userSettings.baseDateStr = document.getElementById('base-date-input').value;
+        userSettings._baseDateSaved = true;
         userSettings.baseTurn = parseInt(document.getElementById('base-turn-select').value);
         userSettings.startShift = document.getElementById('start-shift-select').value;
         userSettings.reserveMode = document.getElementById('reserve-mode-check').checked;
