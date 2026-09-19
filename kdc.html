@@ -2748,8 +2748,6 @@ function renderCalendar() {
     if(annual>0) parts.push(`연차 ${annual}개`);
     document.getElementById('month-stats-display').innerText = parts.join(' / ');
     if(typeof updateAnnualLeaveDisplay === 'function') updateAnnualLeaveDisplay();
-    const tot=cont.children.length, target=Math.ceil(tot/7)*7;
-    for(let i=1;i<=target-tot;i++) createDayCell(new Date(y,m+1,i),true,cont,hSet);
     renderHolidayList(y,m);
     renderMonthlyScheduleList(y,m);
 }
