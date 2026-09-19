@@ -87,6 +87,9 @@ self.addEventListener('fetch', e => {
             --body-bg-extra: none;
             --today-ring: #4c6ef5;
             --nav-btn-bg: #13151f;
+            --stats-bg: #1a1d27;
+            --stats-border: #3a3d50;
+            --stats-color: #f0f0f5;
         }
         /* ── 라이트 모드 ── */
         .light-mode {
@@ -106,6 +109,9 @@ self.addEventListener('fetch', e => {
             --detail-header-bg: linear-gradient(135deg,#dde3ff,#e8ecff);
             --today-ring: #4c6ef5;
             --nav-btn-bg: #e9ecef;
+            --stats-bg: #fffbf0;
+            --stats-border: #f0d080;
+            --stats-color: #222222;
         }
         /* ══ 프리미엄 골드 모드 ══ 밝고 고급스러운 아이보리+골드 */
         .premium-mode {
@@ -317,7 +323,7 @@ self.addEventListener('fetch', e => {
         .schedule-item-text { flex: 1; line-height: 1.4; }
         .no-schedule { font-size: 12px; color: var(--text-sub); padding: 2px 0; font-weight: 400; }
 
-        .month-stats-box { font-size: 12px; color: var(--text-main); background: #fffbf0; padding: 5px 10px; border-radius: 8px; border: 1px solid #f0d080; text-align: center; display:flex; align-items:center; justify-content:center; }
+        .month-stats-box { font-size: 12px; color: var(--stats-color); background: var(--stats-bg); padding: 5px 10px; border-radius: 8px; border: 1px solid var(--stats-border); text-align: center; display:flex; align-items:center; justify-content:center; }
 
         /* ── 하단 탭 영역 (법정공휴일 + 일정버튼) ── */
         .bottom-tabs-wrap {
@@ -333,8 +339,8 @@ self.addEventListener('fetch', e => {
             border-right: 1px solid var(--border-color);
         }
         .holiday-section-title { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
-        .holiday-list { display: flex; flex-direction: column; gap: 3px; max-height: 80px; overflow-y: auto; }
-        .holiday-item { display: flex; flex-direction: column; font-size: 11px; gap: 1px; }
+        .holiday-list { display: flex; flex-direction: row; flex-wrap: wrap; gap: 5px 8px; max-height: 80px; overflow-y: auto; align-content: flex-start; }
+        .holiday-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; gap: 1px; background: rgba(128,128,128,0.09); border-radius: 7px; padding: 3px 7px; }
         .holiday-item .h-date { color: var(--holiday-color); font-size: 10px; }
         .holiday-item .h-name { color: var(--text-main); font-size: 11px; }
         .no-holiday { font-size: 11px; color: var(--text-sub); text-align: center; padding: 4px 0; font-weight: 400; }
@@ -345,7 +351,7 @@ self.addEventListener('fetch', e => {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 4px 8px;
+            padding: 4px 4px;
             gap: 4px;
             flex-shrink: 0;
             cursor: pointer;
@@ -473,6 +479,73 @@ self.addEventListener('fetch', e => {
             text-align: center; padding: 6px 0 2px; font-weight: 400;
         }
 
+        /* ══ 배차표 - 좌우 스와이프 바텀시트 ══ */
+        .timetable-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1500;
+            justify-content: flex-end;
+            align-items: flex-end;
+        }
+        .timetable-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px 20px 0 0;
+            width: 100%; max-width: 450px;
+            height: 78vh;
+            display: flex; flex-direction: column;
+            box-shadow: 0 -8px 32px rgba(0,0,0,0.45);
+            overflow: hidden;
+            animation: svSlideUp 0.25s ease;
+        }
+        .timetable-header {
+            display: flex; align-items: center;
+            padding: 10px 16px 8px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .timetable-title { font-size: 15px; color: var(--text-main); font-weight: 900; flex: 1; }
+        .timetable-tabs {
+            display: flex; gap: 6px;
+            padding: 8px 12px; flex-shrink: 0;
+        }
+        .timetable-tab {
+            flex: 1; text-align: center; padding: 8px 0;
+            border-radius: 10px; background: var(--bg-weekday);
+            font-weight: 800; font-size: 13px; cursor: pointer;
+            color: var(--text-sub); transition: background 0.15s, color 0.15s;
+            user-select: none; -webkit-user-select: none;
+        }
+        .timetable-tab.active {
+            background: linear-gradient(135deg,#4c6ef5,#7048e8);
+            color: #fff;
+        }
+        .timetable-swipe-wrap {
+            display: flex; flex: 1;
+            overflow-x: auto; overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .timetable-page {
+            flex: 0 0 100%; scroll-snap-align: start;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding: 4px 14px 16px;
+        }
+        .timetable-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+        .timetable-table th, .timetable-table td {
+            border: 1px solid var(--border-color);
+            padding: 6px 3px; text-align: center; color: var(--text-main);
+        }
+        .timetable-table thead th {
+            background: var(--bg-weekday); font-weight: 800;
+            position: sticky; top: 0; z-index: 1;
+        }
+        .timetable-table td.tt-turn {
+            font-weight: 900; color: var(--bus-pink); background: var(--bg-weekday);
+        }
+        .timetable-table tbody tr:nth-child(even) td:not(.tt-turn) { background: rgba(128,128,128,0.06); }
+
         /* ══ 모달 공통 ══ */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); justify-content: center; align-items: flex-end; z-index: 1000; padding: 0; }
         .modal.settings-modal-wrap { align-items: center; padding: 15px; }
@@ -506,8 +579,8 @@ self.addEventListener('fetch', e => {
         .shift-select-btn { padding: 9px 0; font-size: 14px; font-weight: 700; border: none; border-radius: 9px; cursor: pointer; color: white; transition: opacity 0.15s, transform 0.1s; letter-spacing: -0.3px; }
         .shift-select-btn:active { opacity: 0.85; transform: scale(0.97); }
         .bg-color-wrap { padding: 8px 12px 0; }
-        .bg-color-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
-        .bg-color-swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.15s, border-color 0.15s; flex-shrink: 0; }
+        .bg-color-row { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+        .bg-color-swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.15s, border-color 0.15s; flex-shrink: 0; }
         .bg-color-swatch:active { transform: scale(0.88); }
         .bg-color-swatch.selected-swatch { border-color: #fff; box-shadow: 0 0 0 2px #4c6ef5; }
         .bg-color-swatch.swatch-none { background: var(--bg-weekday); border: 2px solid var(--border-input); font-size: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-sub); }
@@ -587,6 +660,44 @@ self.addEventListener('fetch', e => {
         .cpicker-btn { flex:1; padding:10px; font-size:14px; font-weight:700; border:none; border-radius:9px; cursor:pointer; }
         .cpicker-btn-cancel { background:#252836; color:#9a9db5; border:1px solid #333; }
         .cpicker-btn-ok { background:linear-gradient(135deg,#4c6ef5,#7048e8); color:white; }
+        .route-badge {
+            font-size: 12px;
+            letter-spacing: 0.3px;
+            padding: 10px 15px 6px;
+            line-height: 1;
+            border-radius: 10px;
+            background: linear-gradient(135deg,#4c6ef5,#7048e8);
+            border: none;
+            color: #fff;
+            white-space: nowrap;
+            flex-shrink: 0;
+            cursor: default;
+            box-shadow: 0 3px 10px rgba(76,110,245,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+        .route-badge-num { font-size: 16px; font-weight: 900; line-height: 1; }
+        .route-badge-cal {
+            font-family: 'Segoe Script','Brush Script MT','Lucida Handwriting',cursive;
+            font-style: italic;
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 1;
+            margin-left: 2px;
+            display: inline-block;
+            vertical-align: baseline;
+        }
+        .premium-mode .route-badge {
+            background: linear-gradient(135deg,#b8860b,#d4a020);
+            box-shadow: 0 3px 10px rgba(184,134,11,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+        }
+        .month-nav-group { display: flex; flex-direction: row; gap: 4px; flex-shrink: 0; }
+        .month-nav-group .nav-btn-sm {
+            padding: 8px 5px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; line-height: 1; border-radius: 7px;
+            background: var(--bg-weekday); border: 1px solid var(--border-input);
+            color: var(--text-main); cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -594,9 +705,9 @@ self.addEventListener('fetch', e => {
 <div class="container">
     <div>
         <div class="header">
-            <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
-            <div id="current-month" style="position:relative;">
-                <button class="month-label-btn" id="month-label-btn" onclick="toggleYmPicker()">2026년 6월 ▾</button>
+            <button class="route-badge" id="app-main-title">Calendar</button>
+            <div id="current-month" style="position:relative;flex:1;text-align:center;">
+                <button class="month-label-btn" id="month-label-btn" onclick="toggleYmPicker()" style="white-space:nowrap;">2026년 6월 ▾</button>
                 <div class="ym-picker-dropdown" id="ym-picker-dropdown">
                     <div class="ym-picker-row">
                         <span class="ym-picker-label">년</span>
@@ -614,7 +725,10 @@ self.addEventListener('fetch', e => {
                     <button class="ym-go-btn" style="width:100%;" onclick="goToYm()">이동</button>
                 </div>
             </div>
-            <button class="nav-btn" onclick="changeMonth(1)">▶</button>
+            <div class="month-nav-group">
+                <button class="nav-btn-sm" onclick="changeMonth(-1)">◀</button>
+                <button class="nav-btn-sm" onclick="changeMonth(1)">▶</button>
+            </div>
             <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleThemeDirect()" title="테마 변경" style="display:flex;flex-direction:column;align-items:center;padding:4px 7px;gap:1px;">
                 <span id="theme-btn-icon" style="font-size:14px;line-height:1;">☀️</span>
                 <span id="theme-btn-label" style="font-size:8px;font-weight:700;letter-spacing:0.3px;color:var(--text-sub);">다크</span>
@@ -647,16 +761,10 @@ self.addEventListener('fetch', e => {
                 <div id="depart-pm-row"></div>
             </div>
         </div>
-        <div class="detail-hint">💡 탭: 날짜 선택·일정입력 &nbsp;|&nbsp; 길게 누르기: 근무변경·순번변경·기념일등록</div>
+        <div class="detail-hint">💡 탭: 날짜 선택 &nbsp;|&nbsp; 길게 누르기: 근무변경·순번변경·일정등록·기념일등록</div>
 
         <div class="detail-schedule-area">
             <div class="detail-schedule-title">📅 일정</div>
-            <div id="bottom-inline-input" style="display:none;flex;align-items:center;gap:6px;margin-bottom:6px;">
-                <input type="text" id="bottom-schedule-input" placeholder="일정 입력..."
-                    style="flex:1;padding:6px 10px;font-size:13px;border-radius:8px;border:1.5px solid var(--border-input);background:var(--bg-input);color:var(--text-main);font-family:inherit;outline:none;-webkit-user-select:text;user-select:text;"
-                    onkeydown="if(event.key==='Enter')addBottomSchedule()">
-                <button onclick="addBottomSchedule()" style="padding:6px 12px;font-size:12px;font-weight:700;border:none;border-radius:8px;background:linear-gradient(135deg,#4c6ef5,#7048e8);color:white;cursor:pointer;white-space:nowrap;flex-shrink:0;">추가</button>
-            </div>
             <div class="schedule-list" id="bottom-schedule-list">
                 <div class="no-schedule">날짜를 눌러 선택하세요</div>
             </div>
@@ -674,8 +782,15 @@ self.addEventListener('fetch', e => {
                     <div class="no-holiday">공휴일 없음</div>
                 </div>
             </div>
-            <!-- 잔여연차 + 밴드가기 + 일정보기 -->
+            <!-- 배차표 + 잔여연차 + 밴드가기 + 일정보기 -->
             <div style="display:flex;gap:1px;align-items:flex-end;">
+                <!-- 배차표 버튼 -->
+                <div class="sched-view-btn-wrap" onclick="openTimetable()" style="padding:4px 1px;">
+                    <div class="sched-view-btn" style="background:linear-gradient(135deg,#1c7ed6,#4dabf7);box-shadow:0 2px 8px rgba(28,126,214,0.4);">
+                        <span style="font-size:20px;line-height:1;">🚌</span>
+                    </div>
+                    <div class="sched-view-btn-label" style="font-size:11px;">배차표</div>
+                </div>
                 <!-- 잔여연차 버튼 -->
                 <div class="sched-view-btn-wrap" onclick="openAnnualLeaveModal()" style="padding:4px 1px;">
                     <div class="sched-view-btn" style="background:linear-gradient(135deg,#e67700,#f59f00);box-shadow:0 2px 8px rgba(245,159,0,0.4);">
@@ -714,25 +829,15 @@ self.addEventListener('fetch', e => {
             </div>
             <input type="date" id="al-start-date" class="select-input" style="width:100%;" onchange="updateTenureDisplay()">
         </div>
-        <!-- 총갯수(왼) + 크기(오) 균등 한 줄 -->
-        <div style="margin-bottom:14px;">
-            <div style="display:flex;align-items:center;gap:0;">
-                <!-- 총갯수 -->
-                <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;">
-                    <span style="font-size:11px;color:var(--text-sub);font-weight:700;">총갯수</span>
-                    <button onclick="changeAnnualLeaveCount(-1)" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-main);font-size:15px;cursor:pointer;font-weight:900;padding:0;">−</button>
-                    <div id="al-count-display" style="min-width:28px;text-align:center;font-size:17px;font-weight:900;color:#f59f00;">15</div>
-                    <button onclick="changeAnnualLeaveCount(1)" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-main);font-size:15px;cursor:pointer;font-weight:900;padding:0;">＋</button>
-                </div>
-                <!-- 구분선 -->
-                <div style="width:1px;height:24px;background:var(--border-input);margin:0 4px;flex-shrink:0;"></div>
-                <!-- 크기 -->
-                <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;">
-                    <span style="font-size:11px;color:var(--text-sub);font-weight:700;">크기</span>
-                    <button onclick="changeAnnualFontSize(-1)" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-main);font-size:15px;cursor:pointer;font-weight:900;padding:0;">−</button>
-                    <div id="al-fs-num-preview" style="min-width:30px;text-align:center;font-size:13px;font-weight:700;color:#f59f00;">18pt</div>
-                    <button onclick="changeAnnualFontSize(1)" style="width:28px;height:28px;border-radius:7px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-main);font-size:15px;cursor:pointer;font-weight:900;padding:0;">＋</button>
-                </div>
+        <!-- 연차갯수 자동계산 + 수동조정 -->
+        <div style="margin-bottom:14px;padding:10px 12px;border-radius:8px;background:var(--bg-weekday);">
+            <div style="font-size:11px;color:var(--text-sub);font-weight:700;text-align:center;margin-bottom:8px;">📌 입사일 입력시 연차갯수는 자동계산 입력됩니다</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+                <span style="font-size:12px;color:var(--text-sub);font-weight:700;">총갯수</span>
+                <button onclick="changeAnnualLeaveCount(-1)" style="width:30px;height:30px;border-radius:7px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-main);font-size:15px;cursor:pointer;font-weight:900;padding:0;">−</button>
+                <div id="al-count-display" style="min-width:32px;text-align:center;font-size:18px;font-weight:900;color:#f59f00;">15</div>
+                <button onclick="changeAnnualLeaveCount(1)" style="width:30px;height:30px;border-radius:7px;border:1px solid var(--border-input);background:var(--bg-input);color:var(--text-main);font-size:15px;cursor:pointer;font-weight:900;padding:0;">＋</button>
+                <span style="font-size:10px;color:var(--text-sub);opacity:0.7;">(수동조정 가능)</span>
             </div>
         </div>
         <div style="display:flex;gap:8px;">
@@ -755,6 +860,32 @@ self.addEventListener('fetch', e => {
         </div>
         <div class="sched-viewer-body" id="sv-body">
             <!-- 달별 섹션이 JS로 렌더링됨 -->
+        </div>
+    </div>
+</div>
+
+<!-- ══ 배차표 - 좌우 스와이프 바텀시트 ══ -->
+<div class="timetable-overlay" id="timetable-overlay" onclick="closeTimetable(event)">
+    <div class="timetable-box" id="timetable-box">
+        <div class="timetable-header">
+            <div style="width:100%;">
+                <span class="sv-drag-handle" id="tt-drag-handle"></span>
+                <div style="display:flex;align-items:center;">
+                    <div class="timetable-title" id="timetable-title">🚌 배차표</div>
+                    <div style="font-size:10px;color:var(--text-sub);margin-right:8px;">좌우로 스와이프</div>
+                    <button class="sv-close-btn" onclick="closeTimetableDirect()">✕</button>
+                </div>
+            </div>
+        </div>
+        <div class="timetable-tabs">
+            <div class="timetable-tab active" data-idx="0" onclick="goToTimetablePage(0)">평일</div>
+            <div class="timetable-tab" data-idx="1" onclick="goToTimetablePage(1)">주말</div>
+            <div class="timetable-tab" data-idx="2" onclick="goToTimetablePage(2)">공휴일</div>
+        </div>
+        <div class="timetable-swipe-wrap" id="timetable-swipe-wrap">
+            <div class="timetable-page" id="timetable-page-weekday"></div>
+            <div class="timetable-page" id="timetable-page-weekend"></div>
+            <div class="timetable-page" id="timetable-page-holiday"></div>
         </div>
     </div>
 </div>
@@ -788,21 +919,32 @@ self.addEventListener('fetch', e => {
 
         <div class="popup-divider"></div>
 
-        <div class="popup-section-wrap">
-            <div class="popup-section-label">🔢 순번 변경 <span id="popup-turn-auto-badge" style="font-size:10px;color:var(--text-sub);font-weight:400;">(자동 계산 중)</span></div>
-            <div style="display:flex;align-items:center;gap:8px;">
-                <button onclick="adjustPopupTurn(-1)" style="width:38px;height:44px;font-size:20px;border-radius:8px;border:1px solid var(--border-input);background:var(--bg-weekday);color:var(--text-main);cursor:pointer;flex-shrink:0;font-weight:900;">−</button>
-                <input id="popup-turn-input" type="number" min="1" max="27" inputmode="numeric"
-                    onclick="this.select()"
-                    style="flex:1;text-align:center;font-size:28px;font-weight:900;color:var(--bus-pink);background:var(--bg-weekday);border:1.5px solid var(--border-input);border-radius:8px;height:44px;outline:none;font-family:inherit;-webkit-user-select:text;user-select:text;padding:0 4px;">
-                <button onclick="adjustPopupTurn(1)" style="width:38px;height:44px;font-size:20px;border-radius:8px;border:1px solid var(--border-input);background:var(--bg-weekday);color:var(--text-main);cursor:pointer;flex-shrink:0;font-weight:900;">＋</button>
+        <div class="popup-section-wrap" style="display:flex;gap:10px;">
+            <div style="flex:1;min-width:0;">
+                <div class="popup-section-label" style="white-space:nowrap;">🔢 순번변경 <span id="popup-turn-auto-badge" style="font-size:9px;color:var(--text-sub);font-weight:400;">(자동)</span></div>
+                <div style="display:flex;align-items:center;gap:5px;">
+                    <button onclick="adjustPopupTurn(-1)" style="width:30px;height:42px;font-size:18px;border-radius:7px;border:1px solid var(--border-input);background:var(--bg-weekday);color:var(--text-main);cursor:pointer;flex-shrink:0;font-weight:900;padding:0;">−</button>
+                    <input id="popup-turn-input" type="number" min="1" max="27" inputmode="numeric"
+                        onclick="this.select()"
+                        style="flex:1;min-width:0;text-align:center;font-size:22px;font-weight:900;color:var(--bus-pink);background:var(--bg-weekday);border:1.5px solid var(--border-input);border-radius:7px;height:42px;outline:none;font-family:inherit;-webkit-user-select:text;user-select:text;padding:0 2px;">
+                    <button onclick="adjustPopupTurn(1)" style="width:30px;height:42px;font-size:18px;border-radius:7px;border:1px solid var(--border-input);background:var(--bg-weekday);color:var(--text-main);cursor:pointer;flex-shrink:0;font-weight:900;padding:0;">＋</button>
+                </div>
+            </div>
+            <div class="bg-color-wrap" style="flex:1;min-width:0;">
+                <div class="popup-section-label">🎨 요일 바탕 색상변경</div>
+                <div class="bg-color-row" id="bg-color-row" style="gap:6px;height:42px;align-items:center;"></div>
             </div>
         </div>
 
         <div class="popup-divider"></div>
-        <div class="bg-color-wrap">
-            <div class="popup-section-label">🎨 날짜 배경색</div>
-            <div class="bg-color-row" id="bg-color-row"></div>
+
+        <div class="popup-section-wrap">
+            <div class="popup-section-label">📅 일정등록</div>
+            <div class="popup-input-row">
+                <input type="text" class="popup-schedule-input" id="popup-schedule-input" placeholder="일정 입력..." onkeydown="if(event.key==='Enter')addPopupSchedule()">
+                <button class="popup-add-btn" onclick="addPopupSchedule()">추가</button>
+            </div>
+            <div class="popup-schedule-list" id="popup-schedule-list"></div>
         </div>
 
         <div class="popup-divider"></div>
@@ -894,35 +1036,35 @@ self.addEventListener('fetch', e => {
             </div>
         </div>
 
-        <!-- 1. 순번 기준점 -->
+        <!-- 1. 순번 기준점 + 근무형태 (3파트) -->
         <div class="setting-group">
-            <label class="setting-label">1. 순번 기준점</label>
-            <div style="display:flex;gap:6px;">
-                <input type="date" class="select-input" id="base-date-input" value="2026-06-01" style="width:57%;">
-                <select class="select-input" id="base-turn-select" style="width:43%;"></select>
-            </div>
-            <!-- 예비기사 모드 토글 버튼 -->
-            <div style="margin-top:8px;">
-                <button id="reserve-mode-btn" onclick="toggleReserveMode()"
-                    style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid var(--border-input);background:var(--bg-weekday);color:var(--text-sub);font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-family:inherit;transition:all 0.18s;">
-                    <span>🚌 예비기사 모드 (순번 숨김)</span>
-                    <span id="reserve-mode-indicator" style="font-size:12px;padding:3px 12px;border-radius:20px;background:var(--bg-input);color:var(--text-sub);font-weight:900;transition:all 0.18s;">OFF</span>
-                </button>
-                <input type="checkbox" id="reserve-mode-check" style="display:none;">
-            </div>
-        </div>
-
-        <!-- 2+3 한 줄 -->
-        <div style="display:flex;gap:6px;">
-            <div class="setting-group" style="flex:1;">
-                <label class="setting-label">2. 기준일 근무형태</label>
-                <select class="select-input" id="start-shift-select">
+            <label class="setting-label">1. 순번 기준점 · 근무형태</label>
+            <div style="display:flex;gap:5px;">
+                <input type="date" class="select-input" id="base-date-input" value="2026-06-01" style="flex:1.5;padding:5px 4px;">
+                <select class="select-input" id="base-turn-select" style="flex:0.9;"></select>
+                <select class="select-input" id="start-shift-select" style="flex:1.1;">
                     <option value="오전">오전 근무</option>
                     <option value="오후">오후 근무</option>
                 </select>
             </div>
-            <div class="setting-group" style="flex:1.5;">
-                <label class="setting-label">3. 정기 휴무 요일</label>
+        </div>
+
+        <!-- 예비기사모드 + 정휴일설정 한 줄 -->
+        <div style="display:flex;gap:6px;">
+            <div class="setting-group" style="flex:1;padding:5px 6px;display:flex;align-items:center;">
+                <!-- 예비기사 모드 토글 버튼 -->
+                <button id="reserve-mode-btn" onclick="toggleReserveMode()"
+                    style="width:100%;padding:6px 10px;border-radius:9px;border:2px solid var(--border-input);background:var(--bg-weekday);color:var(--text-sub);cursor:pointer;display:flex;align-items:stretch;justify-content:space-between;gap:8px;font-family:inherit;transition:all 0.18s;">
+                    <span style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;">
+                        <span style="font-size:11.5px;font-weight:700;white-space:nowrap;">🚌 순번숨김</span>
+                        <span style="font-size:13px;font-weight:900;white-space:nowrap;letter-spacing:-0.2px;">예비기사모드</span>
+                    </span>
+                    <span id="reserve-mode-indicator" style="font-size:12px;padding:0 14px;border-radius:20px;background:var(--bg-input);color:var(--text-sub);font-weight:900;transition:all 0.18s;flex-shrink:0;display:flex;align-items:center;justify-content:center;">OFF</span>
+                </button>
+                <input type="checkbox" id="reserve-mode-check" style="display:none;">
+            </div>
+            <div class="setting-group" style="flex:1.6;padding:5px 8px;display:flex;flex-direction:column;justify-content:center;">
+                <label class="setting-label" style="margin-bottom:3px;">정휴일설정</label>
                 <div class="day-toggle-group">
                     <button class="day-toggle-btn" data-day="0">일</button>
                     <button class="day-toggle-btn" data-day="1">월</button>
@@ -1072,6 +1214,67 @@ self.addEventListener('fetch', e => {
 </div>
 
 <script>
+// ===== 모달 뒤로가기(하드웨어 백버튼) 처리 =====
+// 모달을 열 때 pushModalHistory()로 히스토리를 하나 쌓아두면,
+// 폰 뒤로가기 버튼을 눌렀을 때 앱을 나가는 대신 popstate 이벤트가 발생해
+// 아래 리스너가 열려있는 모달만 화면에서 닫아준다.
+// 저장/닫기 버튼으로 닫을 때는 popModalHistoryIfNeeded()가 쌓아둔 히스토리를
+// 스스로 소비(history.back())해서 다음 번 뒤로가기 때 빈 팝업이 남지 않게 한다.
+let __consumingOwnHistory = false;
+
+function pushModalHistory() {
+    history.pushState({ appModal: true }, '');
+}
+
+function popModalHistoryIfNeeded() {
+    if (history.state && history.state.appModal) {
+        __consumingOwnHistory = true;
+        history.back();
+    }
+}
+
+window.addEventListener('popstate', function() {
+    if (__consumingOwnHistory) { __consumingOwnHistory = false; return; }
+    // 실제 하드웨어 뒤로가기: 열려있는 모달만 화면에서 닫는다 (히스토리 추가 조작 없음)
+    const cpicker = document.getElementById('cpicker-overlay');
+    if (cpicker && cpicker.style.display === 'flex') {
+        cpicker.style.display = 'none';
+        if (typeof cpickerTarget !== 'undefined') cpickerTarget = null;
+        return;
+    }
+    const annualModal = document.getElementById('annual-leave-modal');
+    if (annualModal && annualModal.style.display === 'flex') {
+        annualModal.style.display = 'none';
+        return;
+    }
+    const dayModal = document.getElementById('day-modal');
+    if (dayModal && dayModal.style.display === 'flex') {
+        dayModal.style.display = 'none';
+        const inner = document.getElementById('day-modal-inner');
+        if (inner) { inner.classList.remove('closing'); inner.style.transform = ''; }
+        return;
+    }
+    const schedOverlay = document.getElementById('sched-viewer-overlay');
+    if (schedOverlay && schedOverlay.style.display === 'flex') {
+        schedOverlay.style.display = 'none';
+        const box = document.getElementById('sched-viewer-box');
+        if (box) { box.style.transition = ''; box.style.transform = ''; }
+        return;
+    }
+    const timetableOverlay = document.getElementById('timetable-overlay');
+    if (timetableOverlay && timetableOverlay.style.display === 'flex') {
+        timetableOverlay.style.display = 'none';
+        const ttBox = document.getElementById('timetable-box');
+        if (ttBox) { ttBox.style.transition = ''; ttBox.style.transform = ''; }
+        return;
+    }
+    const settingsModal = document.getElementById('settings-modal');
+    if (settingsModal && settingsModal.style.display === 'flex') {
+        settingsModal.style.display = 'none';
+        return;
+    }
+});
+
 // 노선별 설정
 const ROUTE_CONFIG = {
     '240':  { name: '240번'  },
@@ -1104,7 +1307,10 @@ const SCHED_MODES = [
 let schedModeIdx = 0;
 
 // ── 배차 데이터 (순번별 [오전출발, 오후출발]) ──
-const BUS_SCHEDULE = {
+// 노선별 배차표 데이터
+// ⚠️ 현재 240/242/2015/2016 모두 동일한 시간표(240번 기준 데이터)를 임시로 쓰고 있습니다.
+// 242, 2015, 2016번의 실제 배차시간표를 알려주시면 각 노선에 맞게 정확히 채워드릴게요.
+const BUS_SCHEDULE_240 = {
   weekday: {
     1: ['04:00','07:51','12:27','17:00','21:59'],
     2: ['04:08','08:01','12:35','17:11','22:07'],
@@ -1255,6 +1461,19 @@ const BUS_SCHEDULE = {
   },
 };
 
+// 노선 ID → 배차표 매핑 (지금은 모두 240번 데이터 임시 사용 중)
+const BUS_SCHEDULE_BY_ROUTE = {
+    '240':  BUS_SCHEDULE_240,
+    '242':  BUS_SCHEDULE_240,
+    '2015': BUS_SCHEDULE_240,
+    '2016': BUS_SCHEDULE_240,
+};
+
+function getCurrentBusSchedule() {
+    const id = userSettings.routeId || '240';
+    return BUS_SCHEDULE_BY_ROUTE[id] || BUS_SCHEDULE_BY_ROUTE['240'];
+}
+
 function cycleSchedMode() {
     schedModeIdx = (schedModeIdx + 1) % SCHED_MODES.length;
     userSettings.schedModeIdx = schedModeIdx;
@@ -1304,7 +1523,7 @@ function getDepartTime(turn, date) {
         tableKey = SCHED_MODES[schedModeIdx].key;
     }
 
-    const table = BUS_SCHEDULE[tableKey];
+    const table = getCurrentBusSchedule()[tableKey];
     return table && table[turn] ? table[turn] : ['',''];
 }
 let currentDate = (function(){ const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), 1); })();
@@ -1313,7 +1532,7 @@ let selectedDateStr = "";
 let dayModalDate = null;
 
 const BG_PALETTE = [
-    null,'#ff8a8a','#ffb347','#ffe066','#8ce99a','#74c0fc','#da77f2','#f783ac','#a9e34b','#63e6be',
+    null,'#ff8a8a','#74c0fc','#8ce99a',
 ];
 
 let userSettings = {
@@ -1426,9 +1645,10 @@ function getHolidaysForMonth(year, month) {
         const d = new Date(ds);
         if(d.getFullYear()===year && d.getMonth()===month){
             let label=name;
-            if(name==='설날연휴'){const i=dates.indexOf(ds);label=i===0?'설날 전날':i===1?'설날':i===2?'설날 다음날':'설날 대체공휴일';}
-            else if(name==='추석연휴'){const i=dates.indexOf(ds);label=i===0?'추석 전날':i===1?'추석':i===2?'추석 다음날':'추석 대체공휴일';}
-            result.push({date:ds,name:label});
+            let group=null;
+            if(name==='설날연휴'){const i=dates.indexOf(ds);label=i===0?'설날 전날':i===1?'설날':i===2?'설날 다음날':'설날 대체공휴일';group='설날연휴';}
+            else if(name==='추석연휴'){const i=dates.indexOf(ds);label=i===0?'추석 전날':i===1?'추석':i===2?'추석 다음날':'추석 대체공휴일';group='추석연휴';}
+            result.push({date:ds,name:label,group});
         }
     }));
     return result.sort((a,b)=>a.date.localeCompare(b.date));
@@ -1440,10 +1660,39 @@ function renderHolidayList(y,m){
     const c=document.getElementById('holiday-list-container'); c.innerHTML='';
     if(!holidays.length){c.innerHTML='<div class="no-holiday">없음</div>';return;}
     const days=['일','월','화','수','목','금','토'];
-    holidays.forEach(h=>{
-        const d=new Date(h.date);
+
+    // 설날연휴/추석연휴처럼 연속된 날짜는 하나의 범위(00~00)로 묶는다
+    const grouped=[];
+    let i=0;
+    while(i<holidays.length){
+        const h=holidays[i];
+        if(h.group){
+            let j=i;
+            while(j+1<holidays.length && holidays[j+1].group===h.group &&
+                  (new Date(holidays[j+1].date) - new Date(holidays[j].date))===86400000){
+                j++;
+            }
+            if(j>i){
+                grouped.push({start:holidays[i].date,end:holidays[j].date,name:h.group,isRange:true});
+                i=j+1; continue;
+            }
+        }
+        grouped.push({date:h.date,name:h.name,isRange:false});
+        i++;
+    }
+
+    grouped.forEach(h=>{
         const el=document.createElement('div'); el.className='holiday-item';
-        el.innerHTML=`<span class="h-date">${d.getMonth()+1}/${d.getDate()}(${days[d.getDay()]})</span><span class="h-name">${h.name}</span>`;
+        if(h.isRange){
+            const ds=new Date(h.start), de=new Date(h.end);
+            const dateLabel=(ds.getMonth()===de.getMonth())
+                ? `${ds.getMonth()+1}/${ds.getDate()}~${de.getDate()}`
+                : `${ds.getMonth()+1}/${ds.getDate()}~${de.getMonth()+1}/${de.getDate()}`;
+            el.innerHTML=`<span class="h-date">${dateLabel}</span><span class="h-name">${h.name}</span>`;
+        } else {
+            const d=new Date(h.date);
+            el.innerHTML=`<span class="h-date">${d.getMonth()+1}/${d.getDate()}(${days[d.getDay()]})</span><span class="h-name">${h.name}</span>`;
+        }
         c.appendChild(el);
     });
 }
@@ -1528,6 +1777,7 @@ function openSchedViewer() {
             prevSection.scrollIntoView({ block: 'start' });
         }
     }, 200);
+    pushModalHistory();
     initSvDragClose();
 }
 
@@ -1537,6 +1787,7 @@ function closeSchedViewer(e) {
 }
 
 function closeSchedViewerDirect() {
+    popModalHistoryIfNeeded();
     const box = document.getElementById('sched-viewer-box');
     box.style.transition = 'transform 0.22s ease';
     box.style.transform = 'translateY(100%)';
@@ -1548,6 +1799,104 @@ function closeSchedViewerDirect() {
 }
 
 function svChangeMonth(delta) { /* 더 이상 사용 안 함 */ }
+
+// ══ 배차표 (평일/주말/공휴일 좌우 스와이프, 선택된 노선 기준) ══
+function buildTimetableRows(data) {
+    let html = '<table class="timetable-table"><thead><tr><th>순번</th><th>1회</th><th>2회</th><th>3회</th><th>4회</th><th>5회</th></tr></thead><tbody>';
+    Object.keys(data).sort((a,b) => (+a) - (+b)).forEach(turn => {
+        const times = data[turn] || [];
+        const cells = [0,1,2,3,4].map(i => `<td>${times[i] || ''}</td>`).join('');
+        html += `<tr><td class="tt-turn">${turn}</td>${cells}</tr>`;
+    });
+    html += '</tbody></table>';
+    return html;
+}
+
+function renderTimetable() {
+    const sched = getCurrentBusSchedule();
+    document.getElementById('timetable-page-weekday').innerHTML = buildTimetableRows(sched.weekday);
+    document.getElementById('timetable-page-weekend').innerHTML = buildTimetableRows(sched.weekend);
+    document.getElementById('timetable-page-holiday').innerHTML = buildTimetableRows(sched.holiday);
+    const titleEl = document.getElementById('timetable-title');
+    if(titleEl) titleEl.innerText = `🚌 ${getRouteConfig().name} 배차표`;
+}
+
+function setActiveTimetableTab(idx) {
+    document.querySelectorAll('.timetable-tab').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+    });
+}
+
+function goToTimetablePage(idx) {
+    const wrap = document.getElementById('timetable-swipe-wrap');
+    wrap.scrollTo({ left: wrap.clientWidth * idx, behavior: 'smooth' });
+    setActiveTimetableTab(idx);
+}
+
+function onTimetableSwipeScroll() {
+    const wrap = document.getElementById('timetable-swipe-wrap');
+    if(!wrap.clientWidth) return;
+    const idx = Math.round(wrap.scrollLeft / wrap.clientWidth);
+    setActiveTimetableTab(idx);
+}
+
+function openTimetable() {
+    renderTimetable();
+    document.getElementById('timetable-overlay').style.display = 'flex';
+    pushModalHistory();
+    const wrap = document.getElementById('timetable-swipe-wrap');
+    wrap.scrollLeft = 0;
+    setActiveTimetableTab(0);
+    wrap.onscroll = onTimetableSwipeScroll;
+    initTimetableDragClose();
+}
+
+function closeTimetable(e) {
+    if(e && e.target !== document.getElementById('timetable-overlay')) return;
+    closeTimetableDirect();
+}
+
+function closeTimetableDirect() {
+    popModalHistoryIfNeeded();
+    const box = document.getElementById('timetable-box');
+    box.style.transition = 'transform 0.22s ease';
+    box.style.transform = 'translateY(100%)';
+    setTimeout(() => {
+        document.getElementById('timetable-overlay').style.display = 'none';
+        box.style.transition = '';
+        box.style.transform = '';
+    }, 230);
+}
+
+function initTimetableDragClose() {
+    const box = document.getElementById('timetable-box');
+    const handle = document.getElementById('tt-drag-handle');
+    if(!box || !handle) return;
+    let startY = 0, dragging = false;
+    function onStart(y) { startY = y; dragging = true; box.style.transition = 'none'; }
+    function onMove(y) {
+        if(!dragging) return;
+        const dy = Math.max(0, y - startY);
+        box.style.transform = `translateY(${dy}px)`;
+    }
+    function onEnd(y) {
+        if(!dragging) return; dragging = false; box.style.transition = '';
+        const dy = y - startY;
+        if(dy > 80) closeTimetableDirect();
+        else box.style.transform = '';
+    }
+    handle.ontouchstart = e => { e.stopPropagation(); onStart(e.touches[0].clientY); };
+    handle.ontouchmove  = e => { e.stopPropagation(); onMove(e.touches[0].clientY); };
+    handle.ontouchend   = e => { onEnd(e.changedTouches[0].clientY); };
+    handle.onmousedown  = e => {
+        e.stopPropagation(); onStart(e.clientY);
+        const mm = ev => onMove(ev.clientY);
+        const mu = ev => { onEnd(ev.clientY); document.removeEventListener('mousemove',mm); document.removeEventListener('mouseup',mu); };
+        document.addEventListener('mousemove', mm);
+        document.addEventListener('mouseup', mu);
+    };
+}
+
 
 // 전체 달(전달~다음달 포함 앞뒤 6개월) 렌더링
 // 일정 뷰어 범위: 앞뒤 각 6개월, 더보기로 추가 확장
@@ -1705,7 +2054,7 @@ window.onload = function() {
     updateSchedModeBtn();
     if(!userSettings.routeId) userSettings.routeId = '240';
     renderCalendar(); selectDate(new Date()); initSwipeFeature();
-    updateThemeToggleBtn(); updateAnnualLeaveDisplay();
+    updateThemeToggleBtn(); checkAnnualLeaveAutoRenew(); updateAnnualLeaveDisplay();
     updateRouteTitle();
 };
 
@@ -1805,25 +2154,68 @@ function updateAnnualLeaveDisplay() {
 
 function openAnnualLeaveModal() {
     document.getElementById('annual-leave-modal').style.display = 'flex';
+    pushModalHistory();
     document.getElementById('al-start-date').value = annualLeaveSettings.startDate || new Date().toISOString().slice(0,10);
-    document.getElementById('al-count-display').innerText = annualLeaveSettings.total || 15;
-    // preview 라벨만 업데이트 (13px 고정)
-    const lbl = document.getElementById('al-fs-num-preview');
-    if(lbl) lbl.setAttribute('style','min-width:30px;text-align:center;font-size:13px;font-weight:700;color:#f59f00;');
-    if(lbl) lbl.innerText = (userSettings.annualNumSize || 18) + 'pt';
     updateTenureDisplay();
 }
 
-// 입사일 기준 재직기간 자동 계산: "N년 OO일째 재직중"
+// 근속연수별 연차갯수 자동 계산 (근로기준법 60조: 15일 + 2년마다 1일 가산, 최대 25일)
+function calcAnnualLeaveDays(years) {
+    if(years < 1) return 15;
+    return Math.min(25, 15 + Math.floor((years - 1) / 2));
+}
+
+// 입사일 기준 만 근속연수 계산 (입사 예정이면 -1 반환)
+function getServiceYears(startDateStr) {
+    const start = new Date(startDateStr + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    if(start > today) return -1;
+    let years = today.getFullYear() - start.getFullYear();
+    let anniv = new Date(start);
+    anniv.setFullYear(start.getFullYear() + years);
+    if(anniv > today) { years--; }
+    return years;
+}
+
+// 입사기념일이 지나면 연차갯수를 자동으로 다시 계산해서 갱신
+// (처음 수동으로 맞춰둔 값은 다음 입사기념일이 지나기 전까지는 그대로 유지됨)
+function checkAnnualLeaveAutoRenew() {
+    if(!annualLeaveSettings.startDate) return;
+    const years = getServiceYears(annualLeaveSettings.startDate);
+    if(years < 0) return;
+    if(typeof annualLeaveSettings.lastAppliedYears !== 'number') {
+        // 기존 데이터(또는 최초 설정)는 지금 상태를 기준점으로 삼고, 다음 기념일부터 자동 갱신 시작
+        annualLeaveSettings.lastAppliedYears = years;
+        localStorage.setItem('daewon_annual_leave', JSON.stringify(annualLeaveSettings));
+        return;
+    }
+    if(years > annualLeaveSettings.lastAppliedYears) {
+        annualLeaveSettings.total = calcAnnualLeaveDays(years);
+        annualLeaveSettings.lastAppliedYears = years;
+        localStorage.setItem('daewon_annual_leave', JSON.stringify(annualLeaveSettings));
+    }
+}
+
+function changeAnnualLeaveCount(delta) {
+    const el = document.getElementById('al-count-display');
+    let v = parseInt(el.innerText) + delta;
+    if(v < 0) v = 0;
+    if(v > 99) v = 99;
+    el.innerText = v;
+}
+
+// 입사일 기준 재직기간 자동 계산: "N년 OO일째 재직중" + 연차갯수 자동입력
 function updateTenureDisplay() {
     const el = document.getElementById('al-tenure-display');
     if(!el) return;
     const v = document.getElementById('al-start-date').value;
+    const countEl = document.getElementById('al-count-display');
     if(!v) { el.innerText = ''; return; }
     const start = new Date(v + 'T00:00:00');
     const today = new Date();
     today.setHours(0,0,0,0);
-    if(start > today) { el.innerText = '입사 예정'; return; }
+    if(start > today) { el.innerText = '입사 예정'; if(countEl) countEl.innerText = 15; return; }
     // 만 N년 계산
     let years = today.getFullYear() - start.getFullYear();
     let anniv = new Date(start);
@@ -1831,33 +2223,21 @@ function updateTenureDisplay() {
     if(anniv > today) { years--; anniv.setFullYear(start.getFullYear() + years); }
     // 마지막 입사 기념일 이후 경과일수
     const days = Math.floor((today - anniv) / 86400000) + 1;
-    el.innerText = `${years}년 ${days}일째 재직중`;
+    const leaveDays = calcAnnualLeaveDays(years);
+    if(countEl) countEl.innerText = leaveDays;
+    el.innerText = `${years}년 ${days}일째 재직중 · 연차 ${leaveDays}일`;
 }
 
 function closeAnnualLeaveModal() {
     document.getElementById('annual-leave-modal').style.display = 'none';
-}
-
-function changeAnnualFontSize(delta) {
-    if(!userSettings.annualNumSize) userSettings.annualNumSize = 22;
-    userSettings.annualNumSize = Math.max(12, Math.min(30, userSettings.annualNumSize + parseInt(delta)));
-    // 설정창 내 라벨만 업데이트 (메인은 저장 후 적용)
-    const lbl = document.getElementById('al-fs-num-preview');
-    if(lbl) lbl.setAttribute('style','min-width:30px;text-align:center;font-size:13px;font-weight:700;color:#f59f00;');
-    if(lbl) lbl.innerText = userSettings.annualNumSize + 'pt';
-}
-
-
-function changeAnnualLeaveCount(delta) {
-    const el = document.getElementById('al-count-display');
-    let v = parseInt(el.innerText) + delta;
-    if(v < 1) v = 1; if(v > 99) v = 99;
-    el.innerText = v;
+    popModalHistoryIfNeeded();
 }
 
 function saveAnnualLeave() {
     annualLeaveSettings.startDate = document.getElementById('al-start-date').value;
     annualLeaveSettings.total = parseInt(document.getElementById('al-count-display').innerText);
+    const svYears = getServiceYears(annualLeaveSettings.startDate);
+    annualLeaveSettings.lastAppliedYears = svYears < 0 ? undefined : svYears;
     // annualNumSize는 실시간 저장되므로 userSettings 저장
     saveUserSettings();
     localStorage.setItem('daewon_annual_leave', JSON.stringify(annualLeaveSettings));
@@ -1942,10 +2322,10 @@ function selectRoute(routeId) {
 }
 
 function updateRouteTitle() {
-    const el = document.getElementById('route-title-label');
+    const el = document.getElementById('route-title-label') || document.getElementById('app-main-title');
     if(!el) return;
     const rc = getRouteConfig();
-    el.innerText = rc.name;
+    el.innerHTML = `<span class="route-badge-num">${rc.name}</span><span class="route-badge-cal">Calendar</span>`;
 }
 
 function initRouteButtons() {
@@ -2085,16 +2465,17 @@ function initSettingsForm() {
 function toggleSettingsModal(show) {
     document.getElementById('settings-modal').style.display = show ? 'flex' : 'none';
     if(show) {
+        pushModalHistory();
         initAllRgbDisplays(); initSettingsDragClose(); initRouteButtons(); initRouteSettingUI();
-        // 순번 기준점: 한 번도 직접 저장한 적 없으면(초기 기본값 그대로면) 화면에 보이는 달의 1일을 보여줌.
+        // 순번 기준점: 한 번도 직접 저장한 적 없으면(초기 기본값 그대로면) 오늘 날짜를 보여줌.
         // 이미 저장한 적 있으면 그 값을 그대로 보여줌 (임의로 안 바뀜)
         if(userSettings.baseDateStr === '2026-06-01' && !userSettings._baseDateSaved) {
-            const y = currentDate.getFullYear(), m = currentDate.getMonth();
-            const mm = String(m+1).padStart(2,'0');
-            document.getElementById('base-date-input').value = `${y}-${mm}-01`;
+            document.getElementById('base-date-input').value = getFormattedDateStr(new Date());
         } else {
             document.getElementById('base-date-input').value = userSettings.baseDateStr;
         }
+    } else {
+        popModalHistoryIfNeeded();
     }
 }
 
@@ -2179,6 +2560,7 @@ function openCpicker(colorId) {
     updateSSliderBg(h,v); updateVSliderBg(h,s);
     refreshCpickerUI(h,s,v,hex);
     document.getElementById('cpicker-overlay').style.display = 'flex';
+    pushModalHistory();
 }
 
 function onCpickerSlide() {
@@ -2232,6 +2614,7 @@ function confirmCpicker() {
 function closeCpicker() {
     document.getElementById('cpicker-overlay').style.display = 'none';
     cpickerTarget = null;
+    popModalHistoryIfNeeded();
 }
 
 function saveSettings() {
@@ -2550,10 +2933,13 @@ function openDayModal(date) {
     shiftEl.style.color = shift==='오전'?'var(--am-color)':shift==='오후'?'var(--pm-color)':shift==='연차'?'#f59f00':'var(--holiday-color)';
     renderBgColorPicker(ds);
     renderPopupAnnivList();
+    renderPopupScheduleList(ds);
     renderPopupTurnSection(date);
     document.getElementById('popup-anniv-input').value = '';
     document.getElementById('popup-anniv-yearly').checked = false;
+    document.getElementById('popup-schedule-input').value = '';
     document.getElementById('day-modal').style.display = 'flex';
+    pushModalHistory();
     selectDate(date);
 }
 
@@ -2576,15 +2962,15 @@ function renderBgColorPicker(ds) {
         row.appendChild(sw);
     });
     const customWrap = document.createElement('div');
-    customWrap.style.cssText = 'display:flex;align-items:center;gap:4px;';
+    customWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:2px;';
     const customInput = document.createElement('input');
     customInput.type = 'color';
     customInput.className = 'bg-color-swatch';
-    customInput.style.cssText = 'width:28px;height:28px;padding:1px;border-radius:50%;border:2px solid var(--border-input);cursor:pointer;';
+    customInput.style.cssText = 'width:28px;height:28px;padding:0;border-radius:50%;border:2px solid var(--border-input);cursor:pointer;';
     customInput.value = currentBg || '#ff8a8a'; customInput.title = '직접 색상 선택';
     customInput.addEventListener('change', () => applyBgColor(ds, customInput.value));
     const customLabel = document.createElement('span');
-    customLabel.style.cssText = 'font-size:10px;color:var(--text-sub);';
+    customLabel.style.cssText = 'font-size:9px;color:var(--text-sub);line-height:1;';
     customLabel.innerText = '직접';
     customWrap.appendChild(customInput); customWrap.appendChild(customLabel);
     row.appendChild(customWrap);
@@ -2601,6 +2987,7 @@ function applyBgColor(ds, color) {
 }
 
 function closeDayModalAnimated() {
+    popModalHistoryIfNeeded();
     const inner = document.getElementById('day-modal-inner');
     inner.classList.add('closing');
     inner.addEventListener('animationend', () => {
@@ -2681,7 +3068,7 @@ function renderBottomScheduleList(ds) {
     const rec = memoStorage[ds];
     const schedules = (rec&&rec.schedules)?rec.schedules:[];
     const annivs = getAnniversariesForDate(ds);
-    if(!schedules.length && !annivs.length){ cont.innerHTML=''; return; }
+    if(!schedules.length && !annivs.length){ cont.innerHTML='<div class="no-schedule">등록된 일정이 없습니다</div>'; return; }
     annivs.forEach(a=>{
         const item=document.createElement('div'); item.className='schedule-item';
         item.style.cssText='display:flex;align-items:center;gap:6px;border-left-color:#cc5de8;';
@@ -2714,16 +3101,19 @@ function renderBottomScheduleList(ds) {
     });
 }
 
-function addBottomSchedule() {
-    if(!selectedDate) return;
-    const ds = getFormattedDateStr(selectedDate);
-    const input = document.getElementById('bottom-schedule-input');
+// 날짜 길게누르기 팝업에서 일정 등록
+function addPopupSchedule() {
+    if(!dayModalDate) return;
+    const ds = getFormattedDateStr(dayModalDate);
+    const input = document.getElementById('popup-schedule-input');
     const text = input.value.trim(); if(!text) return;
     const rec = ensureDateRecord(ds);
     rec.schedules.push({title: text, memo: ''});
-    saveMemo(); input.value='';
-    renderBottomScheduleList(ds); renderCalendar();
+    saveMemo(); input.value = '';
+    renderPopupScheduleList(ds); renderBottomScheduleList(ds); renderCalendar();
     renderMonthlyScheduleList(currentDate.getFullYear(), currentDate.getMonth());
+    const cell = document.querySelector(`.day-cell[data-date="${ds}"]`);
+    if(cell) cell.classList.add('selected-active');
 }
 
 function selectDate(date) {
@@ -2737,8 +3127,6 @@ function selectDate(date) {
         `${date.getFullYear()}년 ${date.getMonth()+1}월 ${date.getDate()}일 (${days[date.getDay()]}요일)`;
     const itEl = document.getElementById('info-turn');
     if(itEl) itEl.innerText = calculateTurn(date);
-    const inlineWrap = document.getElementById('bottom-inline-input');
-    if(inlineWrap) { inlineWrap.style.display='flex'; document.getElementById('bottom-schedule-input').value=''; }
     renderBottomScheduleList(selectedDateStr);
     renderDepartTimesPanel(date);
 }
@@ -2774,7 +3162,7 @@ function renderDepartTimesPanel(date) {
         : isSat ? 'weekend'
         : SCHED_MODES[schedModeIdx].key;
 
-    const table = BUS_SCHEDULE[tableKey];
+    const table = getCurrentBusSchedule()[tableKey];
     let lookupTurn = turn;
     if(table) {
         const maxT = Math.max(...Object.keys(table).map(Number));
