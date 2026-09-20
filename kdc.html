@@ -258,7 +258,7 @@ self.addEventListener('fetch', e => {
         .settings-save-btn { background:linear-gradient(135deg,#2f9e44,#51cf66); color:white; border:none; padding:6px 12px; font-size:12px; font-weight:700; border-radius:8px; cursor:pointer; flex-shrink:0; }
 
         .calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); border-top: 1px solid var(--border-color); border-left: 1px solid var(--border-color); margin-top: 4px; }
-        .weekday { text-align: center; background-color: var(--bg-weekday); padding: 8px 0; font-size: 12px; border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); color: var(--text-sub); }
+        .weekday { text-align: center; background-color: var(--bg-weekday); padding: 4px 0; font-size: 12px; border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); color: var(--text-sub); }
         .weekday:nth-child(1) { color: var(--holiday-color); }
         .weekday:nth-child(7) { color: var(--sat-color); }
 
@@ -334,7 +334,7 @@ self.addEventListener('fetch', e => {
         /* 법정공휴일 섹션 */
         .holiday-section {
             flex: 1;
-            padding: 6px 8px 8px;
+            padding: 4px 8px 5px;
             border-right: 1px solid var(--border-color);
         }
         .holiday-section-title { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
@@ -831,28 +831,28 @@ self.addEventListener('fetch', e => {
             <!-- 배차표 + 잔여연차 + 밴드가기 + 일정보기 -->
             <div style="display:flex;gap:1px;align-items:flex-end;">
                 <!-- 배차표 버튼 -->
-                <div class="sched-view-btn-wrap" onclick="openTimetable()" style="padding:4px 1px;">
+                <div class="sched-view-btn-wrap" onclick="openTimetable()" style="padding:2px 1px;">
                     <div class="sched-view-btn" style="background:linear-gradient(135deg,#1c7ed6,#4dabf7);box-shadow:0 2px 8px rgba(28,126,214,0.4);">
                         <span style="font-size:20px;line-height:1;">🚌</span>
                     </div>
                     <div class="sched-view-btn-label" style="font-size:11px;">배차표</div>
                 </div>
                 <!-- 잔여연차 버튼 -->
-                <div class="sched-view-btn-wrap" onclick="openAnnualLeaveModal()" style="padding:4px 1px;">
+                <div class="sched-view-btn-wrap" onclick="openAnnualLeaveModal()" style="padding:2px 1px;">
                     <div class="sched-view-btn" style="background:linear-gradient(135deg,#e67700,#f59f00);box-shadow:0 2px 8px rgba(245,159,0,0.4);">
                         <div id="annual-leave-display" style="font-weight:900;color:#fff;line-height:1;font-size:22px;">-</div>
                     </div>
                     <div class="sched-view-btn-label" style="font-size:11px;">잔여연차</div>
                 </div>
                 <!-- 밴드가기 -->
-                <div class="sched-view-btn-wrap" onclick="openNaverBand()" style="padding:4px 1px;">
+                <div class="sched-view-btn-wrap" onclick="openNaverBand()" style="padding:2px 1px;">
                     <div class="sched-view-btn" style="background:linear-gradient(135deg,#00c73c,#009e2e);box-shadow:0 2px 8px rgba(0,180,60,0.35);">
                         <span style="font-size:20px;line-height:1;">📣</span>
                     </div>
                     <div class="sched-view-btn-label" style="font-size:11px;">밴드가기</div>
                 </div>
                 <!-- 일정보기 -->
-                <div class="sched-view-btn-wrap" onclick="openSchedViewer()" style="padding:4px 1px;">
+                <div class="sched-view-btn-wrap" onclick="openSchedViewer()" style="padding:2px 1px;">
                     <div class="sched-view-btn">
                         📋<span class="sched-count-dot" id="sched-count-dot"></span>
                     </div>
